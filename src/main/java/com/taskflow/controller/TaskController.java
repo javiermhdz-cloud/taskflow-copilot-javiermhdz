@@ -146,5 +146,13 @@ public class TaskController {
         List<Task> vencidas = taskService.vencidas();
         return vencidas.stream().map(TaskMapper::aResponse).toList();
     }
+
+    @Operation(summary = "Lista tareas sin responsable",
+            description = "Lista tareas sin responsable de todos los proyectos. Orden por dueDate asc.")
+    @GetMapping("/tasks/unassigned")
+    public List<TaskResponse> getUnassignedTasks() {
+        List<Task> sinAsignar = taskService.sinResponsable();
+        return sinAsignar.stream().map(TaskMapper::aResponse).toList();
+    }
 }
 

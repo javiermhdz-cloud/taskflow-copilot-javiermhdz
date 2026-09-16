@@ -166,6 +166,45 @@ class TaskServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("SinResponsable")
+    class SinResponsable {
+
+        @Test
+        void devuelveSoloSinResponsableYOrdenadasPorFecha() {
+            try {
+                Task t10 = new Task(10L, "T10", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, null, java.time.LocalDate.now().plusDays(10));
+                Task conAssignee = new Task(20L, "ConAsignado", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, 5L, java.time.LocalDate.now().plusDays(1));
+                Task sinFecha = new Task(30L, "SinFecha", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, null, null);
+                Task t2 = new Task(40L, "T2x", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, null, java.time.LocalDate.now().plusDays(2));
+
+                // repositorio devuelve EN ESTE ORDEN cuatro tareas (t10, conAssignee, sinFecha, t2)
+                when(repository.findAll()).thenReturn(java.util.List.of(t10, conAssignee, sinFecha, t2));
+
+                java.util.List<Task> resultado = service.sinResponsable();
+
+                java.util.List<Long> ids = resultado.stream().map(Task::getId).toList();
+                // Debe venir en orden: la de 2 días (t2 -> 40), la de 10 días (t10 -> 10), y la sin fecha (30)
+                assertEquals(java.util.List.of(40L, 10L, 30L), ids);
+            } catch (TaskValidationException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Test
+        void devuelveVaciaSiNoHaySinResponsable() {
+            try {
+                Task t1 = new Task(1L, "ConResp", "desc", TaskStatus.TODO, Priority.MED, PROYECTO, 1L, null);
+                when(repository.findAll()).thenReturn(java.util.List.of(t1));
+
+                java.util.List<Task> resultado = service.sinResponsable();
+                assertEquals(0, resultado.size());
+            } catch (TaskValidationException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
     @Test
     void vencidas_devuelveSoloVencidasYOrdenadas() {
         try {
