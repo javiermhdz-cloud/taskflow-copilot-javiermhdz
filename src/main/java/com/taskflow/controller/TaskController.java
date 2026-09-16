@@ -135,4 +135,16 @@ public class TaskController {
         Task actualizada = taskService.cambiarStatus(id, request.status());
         return TaskMapper.aResponse(actualizada);
     }
+
+    /**
+     * GET /tasks/overdue — lista las tareas vencidas de todos los proyectos. Orden por dueDate asc.
+     */
+    @Operation(summary = "Lista tareas vencidas",
+            description = "Lista de tareas cuya Task.estaVencida() es true. Orden por dueDate asc.")
+    @GetMapping("/tasks/overdue")
+    public List<TaskResponse> getOverdueTasks() {
+        List<Task> vencidas = taskService.vencidas();
+        return vencidas.stream().map(TaskMapper::aResponse).toList();
+    }
 }
+

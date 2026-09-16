@@ -177,6 +177,25 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.status").value(404));
     }
 
+    // ==================== GET (contra el stub del service, no una semilla) ====================
+
+    @Test
+    void getOverdueTasks_retorna200YListaOrdenada() throws Exception {
+        try {
+            Task tAntigua = new Task(10L, "Antigua", "desc", TaskStatus.IN_PROGRESS, Priority.MED, 1L, 1L, java.time.LocalDate.now().minusDays(3));
+            Task tReciente = new Task(11L, "Reciente", "desc", TaskStatus.IN_PROGRESS, Priority.MED, 1L, 2L, java.time.LocalDate.now().minusDays(1));
+            when(taskService.vencidas()).thenReturn(List.of(tAntigua, tReciente));
+
+            mockMvc.perform(get("/tasks/overdue"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(2))
+                    .andExpect(jsonPath("$[0].title").value("Antigua"))
+                    .andExpect(jsonPath("$[1].title").value("Reciente"));
+        } catch (TaskValidationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     // ---- helpers de datos (reales, no mocks) ----
 
     private Task tarea(Long id, String title, TaskStatus status) {
@@ -191,3 +210,4 @@ class TaskControllerTest {
         }
     }
 }
+

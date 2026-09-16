@@ -165,4 +165,25 @@ class TaskServiceTest {
             throw new IllegalStateException("dato de prueba inválido", e);
         }
     }
+
+    @Test
+    void vencidas_devuelveSoloVencidasYOrdenadas() {
+        try {
+            Task tAntigua = new Task(10L, "Antigua", "desc", TaskStatus.IN_PROGRESS, Priority.MED, PROYECTO, 1L, java.time.LocalDate.now().minusDays(3));
+            Task tReciente = new Task(11L, "Reciente", "desc", TaskStatus.IN_PROGRESS, Priority.MED, PROYECTO, 2L, java.time.LocalDate.now().minusDays(1));
+            Task tDone = new Task(12L, "Hecha", "desc", TaskStatus.DONE, Priority.MED, PROYECTO, 3L, java.time.LocalDate.now().minusDays(2));
+            Task tSinFecha = new Task(13L, "SinFecha", "desc", TaskStatus.IN_PROGRESS, Priority.MED, PROYECTO, 4L, null);
+
+            when(repository.findAll()).thenReturn(java.util.List.of(tReciente, tDone, tAntigua, tSinFecha));
+
+            java.util.List<Task> resultado = service.vencidas();
+
+            org.junit.jupiter.api.Assertions.assertEquals(2, resultado.size());
+            org.junit.jupiter.api.Assertions.assertEquals(10L, resultado.get(0).getId());
+            org.junit.jupiter.api.Assertions.assertEquals(11L, resultado.get(1).getId());
+        } catch (TaskValidationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 }
+
