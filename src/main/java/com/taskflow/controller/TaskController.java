@@ -137,6 +137,21 @@ public class TaskController {
     }
 
     /**
+     * PATCH /tasks/{id}/assignee — reassign solo el responsable. 404 si la tarea no existe; 422 si
+     * la tarea está DONE; 400 por validación de Bean Validation en el DTO.
+     */
+    @Operation(summary = "Reasigna el responsable de una tarea",
+            description = "Cambia solo el assigneeId de la tarea. 404 si la tarea no existe; 422 si la tarea está DONE; 400 si el cuerpo no cumple las validaciones.")
+    @PatchMapping("/tasks/{id}/assignee")
+    public TaskResponse patchAssignee(@PathVariable("id") Long id,
+                                      @Valid @RequestBody com.taskflow.dto.TaskAssigneeUpdateRequest request) {
+        Task task = taskService.buscarPorId(id)
+                .orElseThrow(() -> new com.taskflow.exception.TaskNotFoundException(id));
+        Task updated = taskService.reasignar(task, request.assigneeId());
+        return TaskMapper.aResponse(updated);
+    }
+
+    /**
      * GET /tasks/overdue — lista las tareas vencidas de todos los proyectos. Orden por dueDate asc.
      */
     @Operation(summary = "Lista tareas vencidas",
